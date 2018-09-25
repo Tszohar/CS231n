@@ -24,8 +24,6 @@ def softmax_loss_naive(W, X, y, reg):
     loss = 0.0
     dW = np.zeros_like(W)
 
-    dW = np.random.randn(3073, 500) * 0.0001
-    loss_vec = np.zeros(y.shape[0])
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using explicit loops.     #
     # Store the loss in loss and the gradient in dW. If you are not careful     #
@@ -33,12 +31,12 @@ def softmax_loss_naive(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
 
-    step_size = 0.01
     # Forward
     # multiply data by a matrix in order to create scores for each class
     f1 = X.dot(W)
     f1 -= np.max(f1)
 
+    loss_vec = np.zeros(y.shape[0])
     for image_idx in range(f1.shape[0]):
         denominator = np.sum(np.exp(f1[image_idx]))
         softmax = np.exp(f1[image_idx, y[image_idx]]) / denominator
@@ -55,16 +53,16 @@ def softmax_loss_naive(W, X, y, reg):
         denominator = np.sum(np.exp(f1[image_idx]))
         for class_idx in range(f1.shape[1]):
             softmax = np.exp(f1[image_idx, class_idx]) / denominator
-            df1[image_idx, class_idx] = softmax - (class_idx == y[class_idx])
+            df1[image_idx, class_idx] = softmax - (class_idx == y[image_idx])
 
-    df1dW = np.zeros((f1.shape[0], dW.shape[0], f1.shape[1]))
-    df1dW_ = np.zeros((f1.shape[0], dW.shape[0], f1.shape[1]))
-    for i in range(f1.shape[0]):
-        for n in range(f1.shape[1]):
-            for m in range(dW.shape[0]):
-                df1dW[i, m, n] = X[i, m]
-                df1dW_[i, m, n] = df1[i, n] * df1dW[i, m, n]
-    dW = np.sum(df1dW_, axis=0) + reg * W
+    # df1dW = np.zeros((f1.shape[0], dW.shape[0], f1.shape[1]))
+    # df1dW_ = np.zeros((f1.shape[0], dW.shape[0], f1.shape[1]))
+    # for m in range(dW.shape[0]):
+    #     for n in range(f1.shape[1]):
+    #         for i in range(f1.shape[0]):
+    #             df1dW_[i, m, n] = df1[i, n] * X[i, m]
+    # dW = np.sum(df1dW_, axis=0) + reg * W
+    dW = np.dot(df1.T, X).T / f1.shape[0] + reg * W
     # dW[image_idx, class_idx] = softmax - (class_idx == y[class_idx]) + (reg * W[image_idx, class_idx])
 
     #############################################################################
